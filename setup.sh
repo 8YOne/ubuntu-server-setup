@@ -20,10 +20,6 @@ output_file="output.log"
 function main() {
     read -rp "Enter the username of the new user account:" username
 
-    echo "Please specify your Git Global Name & Email" 
-    read -rp 'Your (git) Name: ' git_name 
-    read -rp 'Your (git) Email Address: ' git_email 
-
     promptForPassword
 
     # Run setup functions
@@ -54,7 +50,6 @@ function main() {
     configureNTP
 
     setupNvm
-    setupGit
 
     sudo service ssh restart
 
@@ -118,14 +113,6 @@ function promptForPassword() {
 
 function setupNvm() {
     execAsUser "${username}" "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash"
-}
-
-function setupGit() {
-  # Configure git
-
-  execAsUser "${username}" "git config --global color.ui true"
-  execAsUser "${username}" "git config --global user.name \"${git_name}\""
-  execAsUser "${username}" "git config --global user.email \"${git_email}\""
 }
 
 function furtherHardening() {

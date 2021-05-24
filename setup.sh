@@ -50,14 +50,14 @@ function main() {
 
     setupTimezone
 
-    echo "Installing Network Time Protocol... " >&3
+    echo "Installing Network Time Protocol... "
     configureNTP
 
     sudo service ssh restart
 
     cleanup
 
-    echo "Setup Done! Log file is located at ${output_file}" >&3
+    echo "Setup Done! Log file is located at ${output_file}"
 }
 
 function setupSwap() {
@@ -87,13 +87,13 @@ function logTimestamp() {
 }
 
 function setupTimezone() {
-    echo -ne "Enter the timezone for the server (Default is 'America/Toronto'):\n" >&3
+    echo -ne "Enter the timezone for the server (Default is 'America/Toronto'):\n"
     read -r timezone
     if [ -z "${timezone}" ]; then
         timezone="America/Toronto"
     fi
     setTimezone "${timezone}"
-    echo "Timezone is set to $(cat /etc/timezone)" >&3
+    echo "Timezone is set to $(cat /etc/timezone)"
 }
 
 # Keep prompting for the password and password confirmation

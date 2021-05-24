@@ -53,6 +53,9 @@ function main() {
     echo "Installing Network Time Protocol... "
     configureNTP
 
+    setupNvm
+    setupGit
+
     sudo service ssh restart
 
     cleanup
@@ -113,12 +116,16 @@ function promptForPassword() {
    done 
 }
 
+function setupNvm() {
+    execAsUser "${username}" "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash"
+}
+
 function setupGit() {
   # Configure git
-  git config --global color.ui true
 
-  git config --global user.name "${git_name}"
-  git config --global user.email "${git_email}"
+  execAsUser "${username}" "git config --global color.ui true"
+  execAsUser "${username}" "git config --global user.name \"${git_name}\""
+  execAsUser "${username}" "git config --global user.email \"${git_email}\""
 }
 
 function furtherHardening() {

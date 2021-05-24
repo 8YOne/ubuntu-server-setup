@@ -20,6 +20,10 @@ output_file="output.log"
 function main() {
     read -rp "Enter the username of the new user account:" username
 
+    echo "Please specify your Git Global Name & Email" 
+    read -rp 'Your (git) Name: ' git_name 
+    read -rp 'Your (git) Email Address: ' git_email 
+
     promptForPassword
 
     # Run setup functions
@@ -31,10 +35,13 @@ function main() {
     echo 'Running setup script...'
     logTimestamp "${output_file}"
 
-    exec 3>&1 >>"${output_file}" 2>&1
+    # Use exec and tee to redirect logs to stdout and a log file at the same time 
+    # https://unix.stackexchange.com/a/145654
+    exec > >(tee -a "${output_file}") 2>&1
     disableSudoPassword "${username}"
     addSSHKey "${username}" "${sshKey}"
     changeSSHConfig
+    furtherHardening
     setupUfw
 
     if ! hasSwap; then
@@ -80,10 +87,10 @@ function logTimestamp() {
 }
 
 function setupTimezone() {
-    echo -ne "Enter the timezone for the server (Default is 'Asia/Singapore'):\n" >&3
+    echo -ne "Enter the timezone for the server (Default is 'America/Toronto'):\n" >&3
     read -r timezone
     if [ -z "${timezone}" ]; then
-        timezone="Asia/Singapore"
+        timezone="America/Toronto"
     fi
     setTimezone "${timezone}"
     echo "Timezone is set to $(cat /etc/timezone)" >&3
@@ -104,6 +111,23 @@ function promptForPassword() {
            PASSWORDS_MATCH=1
        fi
    done 
+}
+
+function setupGit() {
+  # Configure git
+  git config --global color.ui true
+
+  git config --global user.name "${git_name}"
+  git config --global user.email "${git_email}"
+}
+
+function furtherHardening() {
+  # restrict access to the server
+  echo "AllowUsers ${username}" | sudo tee -a /etc/ssh/sshd_config
+
+  # Secure Shared Memory
+  # tip 6 at https://hostadvice.com/how-to/how-to-harden-your-ubuntu-18-04-server/
+  echo "none /run/shm tmpfs defaults,ro 0 0" | sudo tee -a /etc/fstab
 }
 
 main
